@@ -16,9 +16,6 @@ EXEC_INFO_TYPE = Union[
 
 
 class RedTraceLogger(logging.Logger):
-    def __init__(self, name: str, level: int = logging.NOTSET) -> None:
-        super().__init__(name, level)
-
     def verbose(
         self,
         msg: object,
