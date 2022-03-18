@@ -81,7 +81,7 @@ class RedTraceLogger(logging.Logger):
 
 def maybe_update_logger_class() -> None:
     """Conditionally update the Logger class returned by `logging.getLogger()` to RedTraceLogger"""
-    if not isinstance(logging.getLoggerClass(), RedTraceLogger):
+    if not issubclass(logging.getLoggerClass(), RedTraceLogger):
         logging.setLoggerClass(RedTraceLogger)
 
 
