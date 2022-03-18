@@ -19,9 +19,6 @@ class RedTraceLogger(logging.Logger):
     def __init__(self, name: str, level: int = logging.NOTSET) -> None:
         super().__init__(name, level)
 
-        logging.addLevelName(VERBOSE, "VERBOSE")
-        logging.addLevelName(TRACE, "TRACE")
-
     def verbose(
         self,
         msg: object,
@@ -82,6 +79,8 @@ class RedTraceLogger(logging.Logger):
 def maybe_update_logger_class() -> None:
     """Conditionally update the Logger class returned by `logging.getLogger()` to RedTraceLogger"""
     if not issubclass(logging.getLoggerClass(), RedTraceLogger):
+        logging.addLevelName(VERBOSE, "VERBOSE")
+        logging.addLevelName(TRACE, "TRACE")
         logging.setLoggerClass(RedTraceLogger)
 
 
