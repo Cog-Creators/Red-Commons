@@ -24,7 +24,6 @@ requires-python = ">=3.8"
 dynamic = ["version", "description"]
 
 [project.urls]
-"Documentation" = "https://red-commons.readthedocs.io"
 "Issue Tracker" = "https://github.com/Cog-Creators/Red-Commons/issues"
 "Source Code" = "https://github.com/Cog-Creators/Red-Commons"
 
