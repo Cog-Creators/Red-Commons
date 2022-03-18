@@ -85,8 +85,7 @@ def maybe_update_logger_class() -> None:
         logging.setLoggerClass(RedTraceLogger)
 
 
-def getLogger(name: Optional[str] = None) -> Union[RedTraceLogger, logging.Logger]:
+def getLogger(name: Optional[str] = None) -> RedTraceLogger:
     """A typed version of `logging.getLogger()`"""
-
-    logger: Union[RedTraceLogger, logging.Logger] = logging.getLogger(name)
+    logger: RedTraceLogger = logging.getLogger(name)  # type: ignore
     return logger
