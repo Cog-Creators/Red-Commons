@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-class RedTraceLogger(logging.getLoggerClass()):
+class RedTraceLogger(logging.Logger):
     def __init__(self, name, level=logging.NOTSET):
         super().__init__(name, level)
 
@@ -39,8 +39,6 @@ def update_logger():
     if not isinstance(logging.getLoggerClass(), RedTraceLogger):
         logging.setLoggerClass(RedTraceLogger)
 
-
-update_logger()
 
 _log = logging.getLogger("red.commons.logging")
 
