@@ -1,79 +1,92 @@
-import asyncio
-import contextlib
 import logging
+from types import TracebackType
+from typing import Mapping, Optional, Tuple, Type, Union
+
+__all__ = ("RedTraceLogger", "VERBOSE", "TRACE", "maybe_update_logger_class", "getLogger")
 
 VERBOSE = logging.DEBUG - 3
 TRACE = logging.DEBUG - 5
 
-__all__ = [
-    "RedTraceLogger",
-    "VERBOSE",
-    "TRACE",
-    "update_logger",
-    "task_callback_critical",
-    "task_callback_exception",
-    "task_callback_warning",
-    "task_callback_debug",
-    "task_callback_verbose",
-    "task_callback_trace",
+EXEC_INFO_TYPE = Union[
+    bool,
+    Tuple[Type[BaseException], BaseException, Optional[TracebackType]],
+    Tuple[None, None, None],
+    BaseException,
 ]
 
 
 class RedTraceLogger(logging.Logger):
-    def __init__(self, name, level=logging.NOTSET):
+    def __init__(self, name: str, level: int = logging.NOTSET) -> None:
         super().__init__(name, level)
 
         logging.addLevelName(VERBOSE, "VERBOSE")
         logging.addLevelName(TRACE, "TRACE")
 
-    def verbose(self, msg, *args, **kwargs):
+    def verbose(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Optional[EXEC_INFO_TYPE] = None,
+        stack_info: bool = False,
+        stacklevel: int = 1,
+        extra: Optional[Mapping[str, object]] = None,
+    ) -> None:
+        """
+        Log 'msg % args' with severity 'VERBOSE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.verbose("Houston, we have a %s", "thorny problem", exc_info=1)
+        """
         if self.isEnabledFor(VERBOSE):
-            self._log(VERBOSE, msg, args, **kwargs)
+            self._log(
+                VERBOSE,
+                msg,
+                args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                extra=extra,
+                stacklevel=stacklevel,
+            )
 
-    def trace(self, msg, *args, **kwargs):
+    def trace(
+        self,
+        msg: object,
+        *args: object,
+        exc_info: Optional[EXEC_INFO_TYPE] = None,
+        stack_info: bool = False,
+        stacklevel: int = 1,
+        extra: Optional[Mapping[str, object]] = None,
+    ) -> None:
+        """
+        Log 'msg % args' with severity 'TRACE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.trace("Houston, we have a %s", "thorny problem", exc_info=1)
+        """
         if self.isEnabledFor(TRACE):
-            self._log(TRACE, msg, args, **kwargs)
+            self._log(
+                TRACE,
+                msg,
+                args,
+                exc_info=exc_info,
+                stack_info=stack_info,
+                extra=extra,
+                stacklevel=stacklevel,
+            )
 
 
-def update_logger():
+def maybe_update_logger_class() -> None:
+    """Conditionally update the Logger class returned by `logging.getLogger()` to RedTraceLogger"""
     if not isinstance(logging.getLoggerClass(), RedTraceLogger):
         logging.setLoggerClass(RedTraceLogger)
 
 
-_log = logging.getLogger("red.commons.logging")
+def getLogger(name: Optional[str] = None) -> Union[RedTraceLogger, logging.Logger]:
+    """A typed version of `logging.getLogger()`"""
 
-
-def task_callback_critical(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.critical("%s raised an Exception", task.get_name(), exc_info=exc)
-
-
-def task_callback_exception(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.exception("%s raised an Exception", task.get_name(), exc_info=exc)
-
-
-def task_callback_warning(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.warning("%s raised an Exception", task.get_name(), exc_info=exc)
-
-
-def task_callback_debug(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.debug("%s raised an Exception", task.get_name(), exc_info=exc)
-
-
-def task_callback_verbose(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.verbose("%s raised an Exception", task.get_name(), exc_info=exc)
-
-
-def task_callback_trace(task: asyncio.Task) -> None:
-    with contextlib.suppress(asyncio.CancelledError, asyncio.InvalidStateError):
-        if exc := task.exception():
-            _log.trace("%s raised an Exception", task.get_name(), exc_info=exc)
+    logger: Union[RedTraceLogger, logging.Logger] = logging.getLogger(name)
+    return logger
